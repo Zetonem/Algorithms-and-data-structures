@@ -1,0 +1,341 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[russian]{babel}
+\usepackage[left=2.5cm,right=1cm,
+top=2cm,bottom=2cm,bindingoffset=0cm]{geometry}
+\usepackage{amsmath,amsfonts, amssymb}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor, lipsum}
+\lstloadlanguages{MATLAB}
+
+\definecolor{back}{HTML}{FBFDFF}
+\definecolor{board}{RGB}{77, 101, 104}
+\definecolor{keywords}{RGB}{166, 38, 164}
+
+\usepackage{caption}
+\DeclareCaptionFont{white}{\color{white}}
+\DeclareCaptionFormat{listing}{\colorbox{board}{\parbox{\textwidth}{\hspace{15pt}#1#2#3}}}
+\captionsetup[lstlisting]{format=listing,labelfont=white,textfont=white, singlelinecheck=false, margin=0pt, font={bf,footnotesize}}
+
+\newtheorem{theorem}{Задача}
+
+\begin{document}
+\begin{titlepage}
+	\begin{center}
+	\large {
+	ФГБОУ ВПО\\
+	ПЕТЕРБУРГСКИЙ\\
+	ГОСУДАРСТВЕННЫЙ УНИВЕРСИТЕТ ПУТЕЙ СООБЩЕНИЯ\\
+	ИМПЕРАТОРА АЛЕКСАНДРА I}
+	\vspace{2cm}
+			
+	Кафедра "Информационные и вычислительные системы"\\
+	\bigskip
+	\bigskip
+	\bigskip
+	\bigskip          
+			
+	\large
+	ОТЧЕТ\\
+	по лабораторной работе №1\\
+	{\LARGE\textbf{Поиск подстроки в строке}}
+	\end{center}
+		
+	\newlength{\ML}
+	\settowidth{\ML}{дент}
+	\bigskip
+	\bigskip
+	\bigskip
+	\bigskip
+	\bigskip
+	\bigskip
+		
+	\begin{flushleft}
+		Выполнил студент \hspace{4.0cm} $\underset{\text{(подпись)}}{\underline{\hspace*{2.5cm}}}$ \hfill
+		Зайцев Л.А.\\
+		Группа ИВБ-811
+	\end{flushleft}
+		
+	\bigskip
+	\begin{flushleft}
+		Отчет принял \hspace{\ML}\hspace{4.0cm} $\underset{\text{(подпись)}}{\underline{\hspace*{2.5cm}}}$ \hfill Баушев А.Н.
+	\end{flushleft}
+	
+	\vfill
+	\begin{center}
+		Санкт-Петербург, 2020 г.
+	\end{center}
+\end{titlepage}
+
+\section{Введение}
+\textbf{Поиск подстроки в строке} (англ. \textit{String searching algorithm}) -  класс алгоритмов над строками, которые позволяют найти паттерн (\textit{pattern}) в тексте (\textit{str}).
+\begin{theorem} \label{task1}
+	Дана строка $ str[1 .. n] $ и паттерн $ pattern[1 .. m] $ такие, что $ n >= m $ и элементы этих строк — символы из конечного алфавита $ \sum $. Требуется проверить, входит ли $ pattern $ в $ str $.
+\end{theorem}
+Эти алгоритмы подразделяются на несколько групп:
+\begin{itemize}
+	\item \textbf{Сравнение — «чёрный ящик»}\\
+	Во всех этих алгоритмах сравнение строк является «чёрным ящиком». К этим алгоритмам относится \textbf{примитивный алгоритм}.
+	\item \textbf{Основанные на сравнении с начала}\\
+	Это семейство алгоритмов страдает невысокой скоростью на «хороших» данных, что компенсируется отсутствием регрессии на «плохих». К этим алгоритмам относятся \textbf{алгоритм Рабина-Карпа} и \textbf{алгоритм Кнута-Морриса-Пратта}.
+	\item \textbf{Основанные на сравнении с конца}\\
+	Сравнение строк друг с другом проводится справа налево.
+	\item \textbf{Проводящие сравнение в необычном порядке}
+\end{itemize}
+\section{Описание алгоритмов и их реализация}
+\subsection{Примитивный алгоритм}
+\subsubsection{Описание алгоритма}
+В примитивном алгоритме поиск всех допустимых сдвигов производится с помощью цикла, в котором проверяется условие \textit{str[i .. i + m - 1] = pattern} для каждого из \textit{n - m + 1} возможных значений i.
+\subsubsection{Код программы}
+\begin{lstlisting}[language={Matlab}, caption={Примитивный алгоритм поиска подстроки в строке}, label={Script}]
+
+function [index] = Pos(str, pattern)
+
+n = strlength(str);
+m = strlength(pattern);
+for i = 1 : n - m + 1
+  if str(i : i + m - 1) == pattern
+    index = i;
+    return;
+  end
+end
+
+index = -1;
+end % End of 'Pos.m' function
+\end{lstlisting}
+
+\subsubsection{Сложность алгоритма}
+O((n - m) * m)
+
+\subsubsection{Результаты работы}
+m = [5, 10, 20] (красный, зеленый, синий)
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.8\linewidth]{Pos.jpg}
+	\caption{Результат работы примитивного алгоритма}
+\end{figure}
+\subsection{Алгоритм Рабина-Карпа}
+\subsubsection{Описание алгоритма}
+Для реализации данного алгоритма нам понадобится хэш-функция. Воспользуемся полниномиальным хэшем:
+\begin{equation}
+h = hash(s[1 .. n]) = (p^{n}s_{1} + p^{n - 1}s_{2} + ... + p^{0}s_{n}) \: mod \: q,
+\end{equation} где \textit{p} и \textit{q} заранее заданные числа.\\
+Отсюда следует, что:\\
+\begin{equation} \label{eq2}
+h[i + 1] = h[i] \cdot p + s[i]
+\end{equation}
+Исходя из (\ref{eq2}) можно сделать вывод, что для того, чтобы пересчитать хэш-код за O(1) нам необходимо воспользоваться формулой: \\
+\begin{equation}
+hash(s[i .. i + m - 1]) = (p \cdot hash(s[i - 1 .. i + m - 2]) - p^{m}s[i - 1] + s[i + m - 1]) \: mod \: q
+\end{equation}
+Значения для \textit{p} и \textit{q} следует выбрать таким образом, чтобы уменьшить вероятность коллизий. В частности, мы хотим минимизировать количество таких остатков, которые не могут быть хэшем никакой строки. Тогда возьмём взаимнопростые числа.\\
+Алгоритм:
+\begin{enumerate}
+	\item Вычисляем значение хэш-кода для паттерна и для первых \textit{m} символов в тексте.
+	\item Сравниваем хэш код для паттерна и текущей подстроки. Если они равны, то сохраняем индекс и выходим.
+	\item Считаем значение хэш-кода для следующей подстроки, переходи к шагу 2.
+\end{enumerate}
+\subsubsection{Код программы}
+\begin{lstlisting}[language={Matlab}, caption={Алгоритм Рабина-Карпа}, label={Script}]
+function [index] = RabinKarp(str, pattern)
+
+n = strlength(str);
+m = strlength(pattern);
+q = 433494437;
+p = 29;
+h = 1;
+
+% Evalute p^m
+for i = 2 : m + 1
+  h = ModuloMult(h, p, q);
+end
+
+hStr = 0;
+hPattern = 0;
+% Evalute hash value for pattern string and the first window
+for i = 1 : m
+  hPattern = ModuloAdd(pattern(i), ModuloMult(p, hPattern, q), q);
+  hStr = ModuloAdd(str(i), ModuloMult(p, hStr, q), q);
+end
+
+
+if hStr == hPattern
+  index = 1;
+  return;
+end
+
+for i = 2 : n - m + 1   
+  hStr = ModuloAdd(ModuloMult(p, hStr, q), ModuloAdd(-ModuloMult(h, str(i - 1), q), str(i + m - 1), q), q);
+
+  if hStr < 0
+    hStr = hStr + q;
+  end
+
+  if hStr == hPattern
+    index = i;
+    for j = index : index + m - 1
+      if str(j) ~= pattern(j - index + 1)
+        break;
+      end
+    end
+    return;
+  end
+end
+index = -1;
+end % End of 'RabinKarp' function
+
+function res = ModuloAdd(x, y, q)
+res = rem(rem(x, q) + rem(y, q), q);
+end % End of 'ModuloAdd' function
+
+function res = ModuloMult(x, y, q)
+res = rem(rem(x, q) * rem(y, q), q);
+end % End of 'ModuloMult' function
+\end{lstlisting}
+\subsubsection{Сложность алгоритма}
+O(n) в среднем, в худшем O(nm)
+\subsubsection{Результаты работы}
+m = [5, 10, 20] (красный, зеленый, синий)
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.8\linewidth]{RK.jpg}
+	\caption{Результат работы алгоритма Рабина-Карпа}
+\end{figure}
+\vfill
+
+\subsection{Алгоритм Кнута-Морриса-Пратта}
+\subsubsection{Описание алгоритма}
+Дана цепочка T и образец pattern. Требуется найти все позиции, начиная с которых pattern входит в T. 
+Построим строку S = pattern\#str, где \# — любой символ, не входящий в алфавит pattern и str. Посчитаем на ней значение префикс-функции p. Заметим, что по определению префикс-функции при i > |pattern| и p[i] = |pattern| подстроки длины pattern, начинающиеся с позиций 0 и i - |pattern| + 1, совпадают. Если в какой-то позиции i выполняется условие p[i] = |pattern|, то в этой позиции начинается очередное вхождение образца в цепочку.
+\subsubsection{Код программы}
+\begin{lstlisting}[language={Matlab}, caption={Алгоритм Рабина-Карпа}, label={Script}]
+function [index] = KnuthMorrisPratt(str, pattern)
+
+n = length(str);
+m = length(pattern);
+
+a = [pattern, '#', str]; 
+pref = PrefixFuction(a);
+
+for i = 1 : n
+  if pref(m + i) == m
+      index = i - m;
+    return;
+  end
+end
+end % End of 'KnuthMorrisPratt' function
+
+function pref = PrefixFuction(str)
+n = length(str);
+pref = zeros(1, n);
+for i = 2 : n
+  k = pref(i - 1);
+  while k > 0 && str(i) ~= str(k + 1)
+    k = pref(k);
+  end
+  if str(i) == str(k + 1)
+    k = k + 1;
+  end
+  pref(i) = k;
+end
+end % End of 'PrefixFuction' function
+\end{lstlisting}
+\subsubsection{Сложность алгоритма}
+O(n + m)
+\subsubsection{Результаты работы}
+m = [10, 30, 70] (красный, зеленый, синий)
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.8\linewidth]{KMP.jpg}
+	\caption{Результат работы алгоритма Кнута-Морриса-Пратта}
+\end{figure}
+
+\section{Вывод}
+Мы сравнили все 3 алгоритма. Тестовый код:
+\begin{lstlisting}[language={Matlab}, caption={Тестовый скрипт}, label={Script}]
+n = 100 : 100 : 10000;
+m = 5 : 5 : 20;
+t1 = zeros(length(m), length(n));
+t2 = zeros(length(m), length(n));
+t3 = zeros(length(m), length(n));
+array = 'abcdefghijklmnopqrstuvwxyz';
+
+for i = 1 : length(m)
+  for j = 1 : length(n)
+    for k = 1 : n(j)
+      str(k) = array(floor(length(array) * rand(1, 1)) + 1);
+    end
+
+    index = floor((n(j) - m(i)) * rand(1, 1)) + 1;
+    substr = str(index : index + m(i) - 1);
+
+    tic
+    resIndex = Pos(str, substr);
+    t1(i, j) = t1(i, j) + toc;
+
+    if (resIndex ~= index)
+      display("Wrong result.");
+    end
+
+    tic
+    resIndex = RabinKarp(str, substr);
+    t2(i, j) = t2(i, j) + toc;
+
+    if (resIndex ~= index)
+      display("Wrong result.");
+    end
+
+    tic
+    resIndex = KnuthMorrisPratt(str, substr);
+    t3(i, j) = t3(i, j) + toc;
+
+    if (resIndex ~= index)
+      display("Wrong result.");
+    end
+  end
+end
+figure;
+hold on;
+
+grid on;
+title('Substring search graphic'); 
+xlabel('String length');
+ylabel('Search time (seconds)');
+
+
+for i = 1 : length(n)
+  tmp(i) = t1(2, i);
+end
+plot(n, tmp, 'r')
+
+for i = 1 : length(n)
+  tmp(i) = t2(2, i);
+end
+plot(n, tmp, 'g')
+
+for i = 1 : length(n)
+  tmp(i) = t3(2, i);
+end
+plot(n, tmp, 'b')
+\end{lstlisting}
+Проведем сравнение при m = 10. Результаты представлены ниже (красный - \textbf{примитивный алгоритм}, зеленый - \textbf{алгоритм Рабина-Карпа}, красный - \textbf{алгоритм Кнута-Морриса-Пратта}):
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.8\linewidth]{Result.jpg}
+	\caption{Результат сравнения всех трех алгоритмов}
+\end{figure}
+
+Результат сравнения скоростей алгоритмов:
+\begin{enumerate}
+	\item \textbf{Алгоритм Кнута-Морриса-Пратта}
+	\item \textbf{Алгоритм Рабина-Карпа}
+	\item \textbf{Примитивный алгоритм}
+\end{enumerate}
+\section{Библиографический список}
+\begin{enumerate}
+	\item https://neerc.ifmo.ru
+	\item https://ru.wikipedia.org/
+	\item Дж. Макконелл "Анализ алгоритмов"
+\end{enumerate}
+\end{document}
