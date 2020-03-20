@@ -1,1 +1,0 @@
-LevDist('exponential', 'polynomial')

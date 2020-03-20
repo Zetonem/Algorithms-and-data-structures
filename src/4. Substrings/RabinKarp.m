@@ -58,4 +58,3 @@ end % End of 'ModuloAdd' function
 function res = ModuloMult(x, y, q)
 res = rem(rem(x, q) * rem(y, q), q);
 end % End of 'ModuloMult' function
-

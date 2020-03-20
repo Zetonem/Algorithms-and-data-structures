@@ -34,3 +34,4 @@ for i = 2 : n
     pref(i) = k;
 end
 end % End of 'PrefixFuction' function
+
