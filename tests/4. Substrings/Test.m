@@ -24,7 +24,7 @@ for i = 1 : length(m)
         end
         
         tic
-        resIndex = RabinKarp(str, substr);
+        resIndex = RabinKarp(str, substr, 29, 433494437);
         t2(i, j) = t2(i, j) + toc;
         
         if (resIndex ~= index)
@@ -43,10 +43,10 @@ end
 figure;
 hold on;
 
-grid on;
-title('Substring search graphic'); 
-xlabel('String length');
-ylabel('Search time (seconds)');
+% grid on;
+% title('Substring search graphic'); 
+% xlabel('String length');
+% ylabel('Search time (seconds)');
 
 
 for i = 1 : length(n)

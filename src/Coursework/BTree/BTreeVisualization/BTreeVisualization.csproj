@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Textures\pgups.jpg" />
+    <None Remove="Textures\pgups.png" />
+    <None Remove="Textures\pgups2.jpg" />
+    <None Remove="Textures\pgups3.jpg" />
+    <None Remove="Textures\train.png" />
+    <None Remove="Textures\Tree.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Textures\train.png" />
+    <Resource Include="Textures\Tree.png" />
+  </ItemGroup>
+
+</Project>
