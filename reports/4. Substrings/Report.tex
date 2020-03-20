@@ -13,6 +13,17 @@ top=2cm,bottom=2cm,bindingoffset=0cm]{geometry}
 \definecolor{board}{RGB}{77, 101, 104}
 \definecolor{keywords}{RGB}{166, 38, 164}
 
+\lstset{
+	language=Matlab,
+	commentstyle=\color[rgb]{0.8, 0.5, 0.3},
+	showstringspaces=false,
+	keywordstyle=\color{keywords},
+	identifierstyle=\color{black},
+	backgroundcolor=\color{back},
+	extendedchars=\true,
+	keepspaces=true,
+}
+
 \usepackage{caption}
 \DeclareCaptionFont{white}{\color{white}}
 \DeclareCaptionFormat{listing}{\colorbox{board}{\parbox{\textwidth}{\hspace{15pt}#1#2#3}}}
@@ -89,7 +100,6 @@ top=2cm,bottom=2cm,bindingoffset=0cm]{geometry}
 В примитивном алгоритме поиск всех допустимых сдвигов производится с помощью цикла, в котором проверяется условие \textit{str[i .. i + m - 1] = pattern} для каждого из \textit{n - m + 1} возможных значений i.
 \subsubsection{Код программы}
 \begin{lstlisting}[language={Matlab}, caption={Примитивный алгоритм поиска подстроки в строке}, label={Script}]
-
 function [index] = Pos(str, pattern)
 
 n = strlength(str);
@@ -139,7 +149,6 @@ hash(s[i .. i + m - 1]) = (p \cdot hash(s[i - 1 .. i + m - 2]) - p^{m}s[i - 1] +
 \subsubsection{Код программы}
 \begin{lstlisting}[language={Matlab}, caption={Алгоритм Рабина-Карпа}, label={Script}]
 function [index] = RabinKarp(str, pattern)
-
 n = strlength(str);
 m = strlength(pattern);
 q = 433494437;
@@ -150,7 +159,6 @@ h = 1;
 for i = 2 : m + 1
   h = ModuloMult(h, p, q);
 end
-
 hStr = 0;
 hPattern = 0;
 % Evalute hash value for pattern string and the first window
@@ -158,7 +166,6 @@ for i = 1 : m
   hPattern = ModuloAdd(pattern(i), ModuloMult(p, hPattern, q), q);
   hStr = ModuloAdd(str(i), ModuloMult(p, hStr, q), q);
 end
-
 
 if hStr == hPattern
   index = 1;
@@ -250,7 +257,7 @@ m = [10, 30, 70] (красный, зеленый, синий)
 	\includegraphics[width=0.8\linewidth]{KMP.jpg}
 	\caption{Результат работы алгоритма Кнута-Морриса-Пратта}
 \end{figure}
-
+\vfill
 \section{Вывод}
 Мы сравнили все 3 алгоритма. Тестовый код:
 \begin{lstlisting}[language={Matlab}, caption={Тестовый скрипт}, label={Script}]
