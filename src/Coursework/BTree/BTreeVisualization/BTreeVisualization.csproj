@@ -16,6 +16,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BTree\BTree.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="Textures\train.png" />
     <Resource Include="Textures\Tree.png" />
   </ItemGroup>

@@ -25,7 +25,7 @@ namespace BTree
         /// <summary>
         /// Reference to the parent node.
         /// </summary>
-        public Node<Type> Parent { get; set; }
+        // public Node<Type> Parent { get; set; }
 
         /// <summary>
         /// List of children nodes.
@@ -43,7 +43,7 @@ namespace BTree
         /// <param name="parent"></param>
         public Node(Node<Type> parent = null)
         {
-            Parent = parent;
+            // Parent = parent;
         } // End of 'Node' constructor
     } // End of 'Node' class
 } // end of 'BTree' namespace

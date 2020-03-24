@@ -13,11 +13,19 @@
       <RowDefinition Height="0.4*"/>
     </Grid.RowDefinitions>
 
-    <Canvas Grid.Row="0">
+    <!--<Canvas x:Name="MainCanvas" Grid.Row="0" ClipToBounds="True">
       <Canvas.Background>
         <ImageBrush ImageSource="/Textures/Tree.png" Stretch="UniformToFill"></ImageBrush>
       </Canvas.Background>
-    </Canvas>
+    </Canvas>-->
+
+    <ScrollViewer
+      HorizontalScrollBarVisibility="Auto"
+      VerticalScrollBarVisibility="Auto">
+      <Grid x:Name="MainGrid" ShowGridLines="True">
+      </Grid>
+
+    </ScrollViewer>
 
     <Grid Grid.Row="1">
       <Grid.ColumnDefinitions>
@@ -25,7 +33,7 @@
         <ColumnDefinition/>
       </Grid.ColumnDefinitions>
 
-      <Grid Background="Firebrick">
+      <Grid Background="Silver">
         <Grid.ColumnDefinitions>
           <ColumnDefinition/>
           <ColumnDefinition/>
@@ -35,8 +43,8 @@
           <RowDefinition/>
           <RowDefinition/>
         </Grid.RowDefinitions>
-        <TextBox MaxLength="5" TextAlignment="Center" VerticalAlignment="Center" Width="100"/>
-        <Button Grid.Column="1" Margin="10" Width="100" MaxHeight="30" Content="Add value"/>
+        <TextBox x:Name="addTextBox" MaxLength="5" TextAlignment="Center" VerticalAlignment="Center" Width="100" />
+        <Button x:Name="addNode" Grid.Column="1" Margin="10" Width="100" MaxHeight="30" Content="Add value" Click="AddNode_OnClick"/>
 
         <TextBox Grid.Row="1" MaxLength="5" TextAlignment="Center" VerticalAlignment="Center" Width="100"/>
         <Button Grid.Column="1" Grid.Row="1" Margin="10" Width="100" MaxHeight="30" Content="Find value"/>
@@ -46,7 +54,7 @@
       </Grid>
 
 
-      <Grid Grid.Column="1" Background="DarkCyan">
+      <Grid Grid.Column="1" Background="AliceBlue">
         <Grid.RowDefinitions>
           <RowDefinition/>
           <RowDefinition/>

@@ -35,6 +35,8 @@ namespace BTree
         /// </summary>
         private Int32 _count;
 
+        private Int32 _height;
+
         /// <summary>
         /// Max elements in the <see cref="BTree{T}"/> node count.
         /// </summary>
@@ -46,6 +48,10 @@ namespace BTree
         public Int32 Count => _count;
 
         public Boolean IsReadOnly => false;
+
+        public Node<T> Root => _root;
+
+        public Int32 Height => _height;
 
         /// <summary>
         /// Class default by B-Tree power.
@@ -59,6 +65,7 @@ namespace BTree
 
             _t = t;
             _count = 0;
+            _height = 1;
             _root = new Node<T>();
         } // End of 'BTree' constructor
 
@@ -81,12 +88,13 @@ namespace BTree
             _root = new Node<T>();
 
             _root.Children.Add(oldRoot);
-            oldRoot.Parent = _root;
+            // oldRoot.Parent = _root;
 
-            Split(oldRoot, 0);
+            Split(oldRoot, 0, _root);
             InsertInNode(_root, item);
 
             _count++;
+            _height++;
         } // End of 'Add' method
 
         private void InsertInNode(Node<T> node, T key)
@@ -110,7 +118,7 @@ namespace BTree
 
             if (child.Keys.Count >= MaxElements)
             {
-                Split(child, index);
+                Split(child, index, node);
 
                 if (key.CompareTo(node.Keys[index]) > 0)
                     index++;
@@ -119,14 +127,12 @@ namespace BTree
             InsertInNode(node.Children[index], key);
         } // End of 'InsertInNode' function
 
-        private void Split(Node<T> node, Int32 nodeIndex)
+        private void Split(Node<T> node, Int32 nodeIndex, Node<T> parent)
         {
             Int32 n = node.Keys.Count;
 
             if (n < MaxElements)
                 return;
-
-            Node<T> parent = node.Parent;
 
             parent.Keys.Insert(nodeIndex, node.Keys[_t - 1]);
 
