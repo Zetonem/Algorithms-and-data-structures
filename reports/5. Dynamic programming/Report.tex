@@ -1,0 +1,378 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[russian]{babel}
+\usepackage[14pt]{extsizes}
+\usepackage[left=2.5cm,right=1cm,
+top=2cm,bottom=2cm,bindingoffset=0cm]{geometry}
+\usepackage{amsmath,amsfonts, amssymb}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor, lipsum}
+\lstloadlanguages{MATLAB}
+
+\definecolor{back}{HTML}{FBFDFF}
+\definecolor{board}{RGB}{77, 101, 104}
+\definecolor{keywords}{RGB}{166, 38, 164}
+
+\lstset{
+	language=Matlab,
+	commentstyle=\color[rgb]{0.8, 0.5, 0.3},
+	showstringspaces=false,
+	keywordstyle=\color{keywords},
+	identifierstyle=\color{black},
+	backgroundcolor=\color{back},
+	extendedchars=\true,
+	keepspaces=true,
+}
+
+\usepackage{caption}
+\DeclareCaptionFont{white}{\color{white}}
+\DeclareCaptionFormat{listing}{\colorbox{board}{\parbox{\textwidth}{\hspace{15pt}#1#2#3}}}
+\captionsetup[lstlisting]{format=listing,labelfont=white,textfont=white, singlelinecheck=false, margin=0pt, font={bf,footnotesize}}
+
+\begin{document}
+\begin{titlepage}
+  \begin{center}
+    \large {
+    ФГБОУ ВПО\\
+    ПЕТЕРБУРГСКИЙ\\
+    ГОСУДАРСТВЕННЫЙ УНИВЕРСИТЕТ ПУТЕЙ СООБЩЕНИЯ\\
+    ИМПЕРАТОРА АЛЕКСАНДРА I}
+     
+    \vspace{2cm}
+ 
+    Кафедра "Информационные и вычислительные системы"\\
+    \bigskip
+    \bigskip
+    \bigskip
+    \bigskip          
+     
+    \large
+    ОТЧЕТ\\
+    по лабораторной работе №2\\
+    {\LARGE\textbf{Динамическое программирование}}
+  \end{center}
+ 
+\newlength{\ML}
+\settowidth{\ML}{дент}
+\bigskip
+\bigskip
+\bigskip
+\bigskip
+\bigskip
+\bigskip
+
+\begin{flushleft}
+	Выполнил студент \hspace{4.0cm} $\underset{\text{(подпись)}}{\underline{\hspace*{2.5cm}}}$ \hfill Зайцев Л.А.\\
+	Группа ИВБ-811
+\end{flushleft}
+
+\bigskip
+\begin{flushleft}
+	Отчет принял \hspace{\ML}\hspace{4.0cm} $\underset{\text{(подпись)}}{\underline{\hspace*{2.5cm}}}$ \hfill Баушев А.Н.
+\end{flushleft}
+
+\vfill
+\begin{center}
+  Санкт-Петербург, 2020 г.
+\end{center}
+\end{titlepage}
+\newpage
+\section{Алгоритма поиска наибольшей возрастающей подпоследовательности}
+\subsection{Постановка задачи}
+Дан массив из n чисел: a[1 \ldots n]. Требуется найти в этой последовательности строго возрастающую подпоследовательность наибольшей длины.
+\subsection{Описание алгоритма}
+Возьмем массив d[1 \ldots n], где d[i] - это длина наибольшей возрастающей подпоследовательности, оканчивающейся именно в элементе с индексом i.\\
+Пусть текущий индекс — i, т.е. мы хотим посчитать значение d[i], а все предыдущие значения d[1] 
+\ldots d[i-1] уже подсчитаны. Тогда заметим, что у нас есть два варианта:
+\begin{itemize}
+	\item d[i] = 1, т.е. искомая подпоследовательность состоит только из числа a[i].
+	\item  d[i] > 1. Тогда перед числом a[i] в искомой подпоследовательности стоит какое-то другое число. Давайте переберём это число: это может быть любой элемент a[j] (j = 1 \ldots i-1), но такой, что a[j] < a[i]. Пусть мы рассматриваем какой-то текущий индекс j. Поскольку динамика d[j] для него уже подсчитана, получается, что это число a[j] вместе с числом a[i] даёт ответ d[j] + 1. Таким образом, d[i] можно считать по такой формуле:
+	\begin{equation}
+	d[i] = \underset{\underset{a[j] < a[i]}{j = 1 \ldots i - 1}}{max} (d[j] + 1)
+	\end{equation}
+\end{itemize}
+Объединяя эти два варианта в один, получаем окончательный алгоритм для вычисления d[i]:
+	\begin{equation}
+	d[i] = max(1, \underset{\underset{a[j] < a[i]}{j = 1 \ldots i - 1}}{max} (d[j] + 1))
+	\end{equation}
+\subsection{Код программы}
+\begin{lstlisting}[language={Matlab}, caption={Наибольшая возрастающая подпоследовательность}, label={Script}]
+function [Res, Path] = LIS(array)
+Res = 0;
+Path = [];
+
+n = length(array);
+d = zeros(1, n);
+prev = zeros(1, n);
+
+for i = 1 : n
+	d(i) = 1;
+	prev(i) = -1;
+	for j = 1 : n
+		if array(j) < array(i) && 1 + d(j) > d(i)
+			d(i) = d(j) + 1;
+			prev(i) = j;
+		end
+	end
+end
+
+Res = d(1);
+pos = 1;
+
+for i = 1 : n
+	if (d(i) > Res)
+		Res = d(i);
+		pos = i;
+	end
+end
+
+i = 1;
+while pos ~= -1
+	Path(i) = pos;
+	pos = prev(pos);
+	i = i + 1;
+end
+
+n = length(Path);
+for i = 1 : n / 2
+	tmp = Path(i);
+	Path(i) = Path(n - i + 1);
+	Path(n - i + 1) = tmp;
+end
+end % End of 'LIS' function
+\end{lstlisting}
+\subsection{Сложность алгоритма}
+O($n^{2}$)
+\subsection{Результат работы}
+\begin{lstlisting}[language={Matlab}, caption={Тест. Наибольшая возрастающая подпоследовательность}, label={Script}]
+a(1) = 1;
+a(2) = 5;
+a(3) = 3;
+a(4) = 7;
+a(5) = 1;
+a(6) = 4;
+a(7) = 10;
+a(8) = 15;
+
+[ans, path] = LIS(a)
+n = 100 : 100 : 10000
+t1 = zeros(1, length(n));
+
+for i = 1 : length(n)
+	a = zeros(1, n(i));
+	for k = 1 : n(i)
+		a(k) = length(a) * rand(1, 1);
+	end
+	tic
+	LIS(a);
+	t1(i) = toc;
+end
+figure;
+hold on;
+plot(n, t1);
+\end{lstlisting}
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.3\linewidth]{LIS.png}
+	\caption{Результат работы алгоритма по поиску наибольшей возрастающей подпоследовательности}
+\end{figure}
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.6\linewidth]{LIS2.png}
+	\caption{Время работы алгоритма по поиску наибольшей возрастающей подпоследовательности}
+\end{figure}
+\section{Алгоритм поиска расстояния редактирования}
+\subsection{Постановка задачи}
+\textbf{Расстояние редактирования} - это минимальное количество операций вставки одного символа, удаления одного символа и замены одного символа на другой, необходимых для превращения одной строки в другую.
+\subsection{Описание алгоритма}
+Возьмем массив d[1 \ldots n][1 \ldots m], где m и n - длины строк ($S_{1}$ и $S_{2}$), а d[i][j] - расстояние между префиксами строк: первыми i символами строки $S_{1}$ и первыми j символами строки $S_{2}$. Оно вычисляется по формуле:
+\begin{equation}
+d[i][j] = 
+\begin{cases}
+0 & i = 1, j = 1;\\
+i & j = 1, i > 1\\
+j & j > 1, i = 1\\
+d(i - 1, j - 1) & S_{1}[i] = S_{2}[j]\\
+min(\\d(i, j - 1) + 1,\\ d(i - 1, j) + 1,\\ d(i - 1, j - 1) + 1) & j > 1, i > 1, S_{1}[i] \neq S_{2}[j]
+\end{cases}
+\end{equation}
+\subsection{Код программы}
+\begin{lstlisting}[language={Matlab}, caption={Расстояние редактирования}, label={Script}]
+function [Res] = LevDist(a, b)
+n = length(a) + 1;
+m = length(b) + 1;
+Res = 0;
+d = zeros(n, m);
+
+for i = 2 : n
+	d(i, 1) = i - 1;
+end
+
+for j = 2 : m
+	d(1, j) = j - 1;
+end
+
+for i = 2 : n
+	for j = 2 : m
+		if a(i - 1) ~= b(j - 1)
+			d(i, j) = min(d(i, j - 1) + 1, min(d(i - 1, j) + 1, d(i - 1, j - 1) + 1));
+		else
+			d(i, j) = d(i - 1, j - 1);
+		end
+	end
+end
+
+d
+Res = d(n, m);
+end % End of 'LevDist' function
+\end{lstlisting}
+\subsection{Сложность алгоритма}
+O(mn)
+\subsection{Результат работы}
+\begin{lstlisting}[language={Matlab}, caption={Тест. Расстояние редактирования}, label={Script}]
+LevDist('exponential', 'polynomial')
+\end{lstlisting}
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.75\linewidth]{LevDist.png}
+	\caption{Результат работы алгоритма по поиску расстояния редактирования}
+\end{figure}
+\section{Задача о рюкзаке 0-1}
+\subsection{Постановка задачи}
+Дано N предметов, W — вместимость рюкзака, w = {$w_{1}, w_{2},$ \ldots , $w_{N}$} — соответствующий ему набор положительных целых весов, p = {$p_{1}, p_{2},$ \ldots , $p_{N}$} — соответствующий ему набор положительных целых стоимостей. Нужно найти набор бинарных величин B={$b_{1}, b_{2}$, \ldots , $b_{N}$}, где $b_{i}$ = 1, если предмет $n_{i}$ включен в набор, $b_{i}$ = 0, если предмет $n_{i}$ не включен, и такой что:
+\begin{enumerate}
+	\item $b_{1}w_{1}+ \ldots + b_{N}w_{N} \leq W$
+	\item $b_{1}p_{1}+\ldots+b_{N}p_{N}$ максимальна.
+\end{enumerate}
+\subsection{Описание алгоритма}
+Пусть A(k,s) есть максимальная стоимость предметов, которые можно уложить в рюкзак вместимости s, если можно использовать только первые k предметов, то есть ${n_{1},n_{2}, \ldots ,n_{k}}$, назовем этот набор допустимых предметов для A(k,s).\\
+
+A(k,1) = 0\\
+
+A(1,s) = 0\\
+
+Найдем A(k,s). Возможны 2 варианта:
+
+\begin{enumerate}
+	\item Если предмет k не попал в рюкзак. Тогда A(k,s) равно максимальной стоимости рюкзака с такой же вместимостью и набором допустимых предметов ${n_{1}, \ldots , n_{k - 1}}$, то есть A(k, s) = A(k - 1, s)
+	\item Если k попал в рюкзак. Тогда A(k,s) равно максимальной стоимости рюкзака, где вес s уменьшаем на вес k-ого предмета и набор допустимых предметов ${n_{1}, n_{2}, \ldots , n_{k - 1}}$ плюс стоимость k, то есть $A(k - 1, s - w_{k}) + p_{k}$
+\end{enumerate}
+\subsection{Код программы}
+\begin{lstlisting}[language={Matlab}, caption={Тест. Расстояние редактирования}, label={Script}]
+function [Res, Collection] = Knapsack01(w, p, Weight)
+Collection = [];
+Res = 0;
+n = length(w);
+A = zeros(n + 1, Weight + 1);
+
+for i = 2 : n + 1
+	for j = 1 : Weight + 1
+		if j > w(i - 1)
+			A(i, j) = max(A(i - 1, j), A(i - 1, j - w(i - 1)) + p(i - 1));
+		else
+			A(i, j) = A(i - 1, j);
+		end
+	end
+end
+
+A
+Res = A(n + 1, Weight + 1);
+
+i = n + 1;
+j = Weight + 1;
+index = 1;
+
+while A(i, j) ~= 0
+	if A(i - 1, j) == A(i, j)
+		i = i - 1;
+	else
+		i = i - 1;
+		j = j - w(i);
+		Collection(index) = i;
+		index = index + 1;
+	end
+end
+end % End of 'Knapsack01' function
+\end{lstlisting}
+\subsection{Сложность алгоритма}
+O(nW)
+\subsection{Результат работы}
+\begin{lstlisting}[language={Matlab}, caption={Тест. Задача о рюкзаке без повторений}, label={Script}]
+Knapsack01([3, 4, 5, 8, 9], [1, 6, 4, 7, 6], 13)
+\end{lstlisting}
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.75\linewidth]{Knapsack01.png}
+	\caption{Результат работы алгоритма задача о рюкзаке без повторений}
+\end{figure}
+\section{Задача о неограниченном рюкзаке}
+\subsection{Постановка задачи}
+Теперь любой предмет можно брать неограниченное количество раз.
+\subsection{Описание алгоритма}
+Пусть d(i,j) - максимальная стоимость любого количества вещей типов от 1 до i, суммарным весом до j включительно.
+Заполним d(0,j) нулями.
+Тогда меняя i от 2 до N, рассчитаем на каждом шаге d(i, j), для c от 1 до W, по рекуррентной формуле:
+\begin{equation}
+d(i, j)=\begin{cases}
+d(i - 1, j) & for j = 0, \ldots , w_{i} - 1\\
+max(d(i - 1, j), d(i, j - w_{i}) + p_{i}) & for j = w_{i}, \ldots , W;
+\end{cases}
+\end{equation}
+\subsection{Код программы}
+\begin{lstlisting}[language={Matlab}, caption={Тест. Задача о неограниченном рюкзаке}, label={Script}]
+function [Res, Collection] = Knapsack(w, p, Weight)
+Res = 0;
+Collection = [];
+
+n = length(w);
+d = zeros(n + 1, Weight + 1);
+
+for i = 2 : n + 1
+	for j = 1 : Weight + 1
+		if j > w(i - 1)
+			d(i, j) = max(d(i - 1, j), d(i, j - w(i - 1)) + p(i - 1));
+		else
+			d(i, j) = d(i - 1, j);
+		end
+	end
+end
+d
+Res = d(i, j);
+
+i = n + 1;
+j = Weight + 1;
+index = 1;
+
+while d(i, j) ~= 0
+	if d(i - 1, j) == d(i, j)
+		i = i - 1;
+	else
+		j = j - w(i - 1);
+		Collection(index) = i - 1;
+		index = index + 1;
+	end
+end
+end % End of 'Knapsack' function
+\end{lstlisting}
+
+\subsection{Сложность алгоритма}
+O(nW)
+\subsection{Результат работы}
+\begin{lstlisting}[language={Matlab}, caption={Тест. Задача о неограниченном рюкзаке}, label={Script}]
+[ans, coll] = Knapsack([3, 4, 5, 8, 9], [1, 6, 4, 7, 6], 13)
+\end{lstlisting}
+\newpage
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.75\linewidth]{Knapsack.png}
+	\caption{Результат работы алгоритма задача о неограниченном рюкзаке}
+\end{figure}
+\section{Вывод}
+В ходе выполнения лабораторной работы мы познакомились с методом динамического программирования путем решения классических задач. Динамическое программирование - способ решения сложных задач путём разбиения их на более простые подзадачи. Мы научились составлять функциональные уравнения динамического программирования.
+\section{Библиографический список}
+\begin{enumerate}
+	\item https://ru.wikipedia.org/
+	\item https://neerc.ifmo.ru/
+\end{enumerate}
+\end{document}

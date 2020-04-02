@@ -23,6 +23,9 @@
       HorizontalScrollBarVisibility="Auto"
       VerticalScrollBarVisibility="Auto">
       <Grid x:Name="MainGrid" ShowGridLines="True">
+        <Grid.Background>
+          <ImageBrush ImageSource="/Textures/Tree.png" Stretch="UniformToFill"></ImageBrush>
+        </Grid.Background>
       </Grid>
 
     </ScrollViewer>

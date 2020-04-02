@@ -88,7 +88,7 @@ namespace BTree
             _root = new Node<T>();
 
             _root.Children.Add(oldRoot);
-            // oldRoot.Parent = _root;
+            oldRoot.Parent = _root;
 
             Split(oldRoot, 0, _root);
             InsertInNode(_root, item);
