@@ -31,8 +31,8 @@ namespace BTreeVisualization
 
         private void TraversTree(Node<Int32> node, Int32 level, List<NodeLev> list)
         {
-            if (node.Keys.Count == 0)
-                return;
+            //if (node.Keys.Count == 0)
+            //   return;
 
             if (node.Children.Count != 0)
                 TraversTree(node.Children[0], level + 1, list);
@@ -130,6 +130,31 @@ namespace BTreeVisualization
             }
 
             tree.Add(num);
+
+            List<NodeLev> nodes = new List<NodeLev>();
+
+            TraversTree(tree.Root, 1, nodes);
+
+            Output(nodes);
+        }
+
+        private void removeNode_Click(object sender, RoutedEventArgs e)
+        {
+            Int32 num;
+
+            if (!Int32.TryParse(removeTextBox.Text, out num))
+            {
+                MessageBox.Show("Error data");
+                return;
+            }
+
+            if (!tree.Contains(num))
+            {
+                MessageBox.Show($"{num} isn't in tree.");
+                return;
+            }
+
+            tree.Remove(num);
 
             List<NodeLev> nodes = new List<NodeLev>();
 

@@ -52,8 +52,8 @@
         <TextBox Grid.Row="1" MaxLength="5" TextAlignment="Center" VerticalAlignment="Center" Width="100"/>
         <Button Grid.Column="1" Grid.Row="1" Margin="10" Width="100" MaxHeight="30" Content="Find value"/>
 
-        <TextBox Grid.Row="2" MaxLength="5" TextAlignment="Center" VerticalAlignment="Center" Width="100"/>
-        <Button Grid.Column="1" Grid.Row="2" Margin="10" Width="100" MaxHeight="30" Content="Delete value"/>
+        <TextBox x:Name="removeTextBox" Grid.Row="2" MaxLength="5" TextAlignment="Center" VerticalAlignment="Center" Width="100"/>
+        <Button x:Name="removeNode"  Grid.Column="1" Grid.Row="2" Margin="10" Width="100" MaxHeight="30" Content="Delete value" Click="removeNode_Click"/>
       </Grid>
 
 
