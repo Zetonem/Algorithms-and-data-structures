@@ -21,6 +21,11 @@ namespace BTreeVisualization
         public MainWindow()
         {
             InitializeComponent();
+
+            tree.Add(100);
+            tree.Add(200);
+            tree.Add(300);
+            tree.Add(400);
         }
 
         private struct NodeLev
