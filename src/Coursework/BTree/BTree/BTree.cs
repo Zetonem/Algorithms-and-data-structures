@@ -225,7 +225,7 @@ namespace BTree
                     curNode = curNode.Children[index];
                     prevIndex = index;
                     index = curNode.Keys.TakeWhile(key => item.CompareTo(key) > 0).Count();
-                } while (index < curNode.Keys.Count && curNode.Keys[index].CompareTo(item) != 0);
+                } while ((index < curNode.Keys.Count && curNode.Keys[index].CompareTo(item) != 0) || (index < curNode.Children.Count && !curNode.Keys.Contains(item)));
             }
 
 
@@ -455,7 +455,7 @@ namespace BTree
             Int32 prevIndex = -1;
             Int32 index = curNode.Keys.TakeWhile(key => item.CompareTo(key) > 0).Count();
 
-            while (index < curNode.Keys.Count && curNode.Keys[index].CompareTo(item) != 0)
+            while ((index < curNode.Keys.Count && curNode.Keys[index].CompareTo(item) != 0) || (index < curNode.Children.Count && !curNode.Keys.Contains(item)))
             {
                 prevNode = curNode;
                 curNode = curNode.Children[index];
@@ -674,7 +674,11 @@ namespace BTree
         /// Converts <see cref="BTree{T}"/> to string.
         /// </summary>
         /// <returns>Tree in the string format.</returns>
-        public override String ToString() => ToString(_root, new StringBuilder());
+        public override String ToString()
+        {
+            _height = 0;
+            return ToString(_root, new StringBuilder(), 1);
+        } // End of 'ToString' method
 
         /// <summary>
         /// Converts <see cref="BTree{T}"/> to string (internal method).
@@ -682,7 +686,7 @@ namespace BTree
         /// <param name="node">Start node to convert.</param>
         /// <param name="s">Current string.</param>
         /// <returns>Tree in the string format.</returns>
-        private String ToString(Node<T> node, StringBuilder s)
+        private String ToString(Node<T> node, StringBuilder s, Int32 curH)
         {
             foreach (var key in node.Keys)
             {
@@ -696,11 +700,14 @@ namespace BTree
             else
                 foreach (var child in node.Children)
                 {
-                    ToString(child, s);
+                    ToString(child, s, curH + 1);
                     s.Append(", ");
                 }
 
             s.Append(")");
+
+            if (curH > _height)
+                _height = curH;
 
             return s.ToString();
         } // End of 'ToString' method

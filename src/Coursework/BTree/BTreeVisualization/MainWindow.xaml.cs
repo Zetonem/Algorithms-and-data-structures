@@ -63,6 +63,8 @@ namespace BTreeVisualization
             MainGrid.ColumnDefinitions.Clear();
             MainGrid.RowDefinitions.Clear();
 
+            tree.ToString();
+
             for (Int32 i = 0; i < tree.Height; i++)
                 MainGrid.RowDefinitions.Add(new RowDefinition());
 
@@ -70,7 +72,7 @@ namespace BTreeVisualization
 
             List<Int32> levels = new List<Int32>();
 
-            for (Int32 i = 0; i < nodes[0].Level; i++)
+            for (Int32 i = 0; i < tree.Height; i++)
                 levels.Add(0);
 
             for (Int32 i = 0; i < nodes.Count; i++)
@@ -90,7 +92,7 @@ namespace BTreeVisualization
 
             levels.Clear();
 
-            for (Int32 i = 0; i < nodes[0].Level; i++)
+            for (Int32 i = 0; i < tree.Height; i++)
                 levels.Add(0);
 
             for (Int32 i = 0; i < nodes.Count; i++)
