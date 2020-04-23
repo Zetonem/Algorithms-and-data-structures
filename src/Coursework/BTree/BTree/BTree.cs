@@ -251,14 +251,18 @@ namespace BTree
                 {
                     // find N, the leftmost leaf in the right subtree of z;
                     Node<T> nextNode = curNode.Children[index + 1];
+                    Node<T> parent = curNode;
 
                     while (!nextNode.IsLeaf)
                     {
+                        parent = nextNode;
                         nextNode = nextNode.Children[0];
                     }
 
                     // let z’ be the smallest key in N;
                     T newKey = nextNode.Keys[0];
+
+                    Int32 newIndex = parent.Keys.TakeWhile(key => newKey.CompareTo(key) > 0).Count();
 
                     // remove z’ from N;
                     nextNode.Keys.RemoveAt(0);
@@ -267,7 +271,7 @@ namespace BTree
                     curNode.Keys[index] = newKey;
 
                     // Adjust(N);
-                    Adjust(nextNode, curNode, index + 1);
+                    Adjust(nextNode, parent, newIndex);
                 }
                 // ENDIF
             }
