@@ -26,6 +26,22 @@ namespace BTreeVisualization
             tree.Add(200);
             tree.Add(300);
             tree.Add(400);
+            tree.Add(75);
+            tree.Add(500);
+            tree.Add(600);
+            tree.Add(700);
+            tree.Add(800);
+            tree.Add(900);
+            tree.Add(1000);
+            tree.Add(1100);
+            tree.Add(1200);
+            tree.Add(1300);
+            tree.Add(1400);
+            tree.Add(1500);
+            tree.Add(1600);
+            tree.Add(1700);
+            tree.Add(25);
+            tree.Add(50);
         }
 
         private struct NodeLev
@@ -100,7 +116,7 @@ namespace BTreeVisualization
                 Border border = new Border
                 {
                     CornerRadius = new CornerRadius(5),
-                    Background = Brushes.DeepSkyBlue,
+                    Background = Brushes.GhostWhite,
                     Width = 300,
                     Height = 70,
                     Margin = new Thickness(10)
@@ -126,7 +142,7 @@ namespace BTreeVisualization
             }
         }
 
-        private async void AddNode_OnClick(object sender, RoutedEventArgs e)
+        private void AddNode_OnClick(object sender, RoutedEventArgs e)
         {
             Int32 num;
 
