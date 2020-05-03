@@ -1,6 +1,6 @@
 ﻿/* FILE NAME   : BTree.cs
  * PROGRAMMER  : Leonid Zaytsev.
- * LAST UPDATE : 20.03.2020.
+ * LAST UPDATE : 03.05.2020.
  * NOTE        : None.
  *
  * Copyright © 2020 Leonid Zaytsev. All rights reserved.
@@ -8,7 +8,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 using System.Linq;
 using System.Text;
 
@@ -89,7 +88,6 @@ namespace BTree
             _root = new Node<T>();
 
             _root.Children.Add(oldRoot);
-            oldRoot.Parent = _root;
 
             Split(oldRoot, 0, _root);
             InsertInNode(_root, item);
@@ -137,7 +135,7 @@ namespace BTree
 
             parent.Keys.Insert(nodeIndex, node.Keys[_t - 1]);
 
-            Node<T> newNode = new Node<T>(parent);
+            Node<T> newNode = new Node<T>();
             newNode.Keys.AddRange(node.Keys.GetRange(_t, _t - 1));
             node.Keys.RemoveRange(_t - 1, _t);
 
@@ -152,9 +150,15 @@ namespace BTree
 
         #endregion
 
+        /// <summary>
+        /// Delete all items from <see cref="BTree{T}"/>.
+        /// </summary>
         public void Clear()
         {
-            throw new NotImplementedException();
+            while (_root.Keys.Count > 0)
+            {
+                this.Remove(_root.Keys[0]);
+            }
         } // End of 'Clear' method
 
         /// <summary>
@@ -205,7 +209,6 @@ namespace BTree
             if (_root.Keys.Count == 0)
                 throw new NullReferenceException("Tree is already empty.");
 
-
             // Find node M where z "belongs";
             Int32 index = _root.Keys.TakeWhile(key => item.CompareTo(key) > 0).Count();
             Int32 prevIndex = -1;
@@ -215,7 +218,12 @@ namespace BTree
 
             if (_root.Keys.Contains(item))
             {
-                ;
+                if (_root.IsLeaf)
+                {
+                    _root.Keys.RemoveAt(index);
+                    _count--;
+                    return true;
+                }
             }
             else
             {
@@ -227,7 +235,6 @@ namespace BTree
                     index = curNode.Keys.TakeWhile(key => item.CompareTo(key) > 0).Count();
                 } while ((index < curNode.Keys.Count && curNode.Keys[index].CompareTo(item) != 0) || (index < curNode.Children.Count && !curNode.Keys.Contains(item)));
             }
-
 
             // IF z is not in M THEN
             if (!curNode.Keys.Contains(item))
@@ -249,29 +256,29 @@ namespace BTree
                 // ELSE
                 else
                 {
-                    // find N, the leftmost leaf in the right subtree of z;
-                    Node<T> nextNode = curNode.Children[index];
+                    // find N, the rightmost leaf in the left subtree of z;
+                    Node<T> previousNode = curNode.Children[index];
                     Node<T> parent = curNode;
 
-                    while (!nextNode.IsLeaf)
+                    while (!previousNode.IsLeaf)
                     {
-                        parent = nextNode;
-                        nextNode = nextNode.Children[nextNode.Children.Count - 1];
+                        parent = previousNode;
+                        previousNode = previousNode.Children[previousNode.Children.Count - 1];
                     }
 
-                    // let z’ be the smallest key in N;
-                    T newKey = nextNode.Keys[nextNode.Keys.Count - 1];
+                    // let z’ be the bigest key in N;
+                    T newKey = previousNode.Keys[previousNode.Keys.Count - 1];
 
                     Int32 newIndex = parent.Keys.TakeWhile(key => newKey.CompareTo(key) > 0).Count();
 
                     // remove z’ from N;
-                    nextNode.Keys.RemoveAt(nextNode.Keys.Count - 1);
+                    previousNode.Keys.RemoveAt(previousNode.Keys.Count - 1);
 
                     // replace z in M by z’;
                     curNode.Keys[index] = newKey;
 
                     // Adjust(N);
-                    Adjust(nextNode, parent, newIndex);
+                    Adjust(previousNode, parent, newIndex);
                 }
                 // ENDIF
             }
@@ -287,7 +294,7 @@ namespace BTree
             //IF M is overflowing THEN
             if (node.Keys.Count >= 2 * _t - 1)
             {
-                // IF Right_Sibling_of(M) exists and is not full THEN
+                /*// IF Right_Sibling_of(M) exists and is not full THEN
                 if (index + 1 < parent.Children.Count && parent.Children[index + 1].Keys.Count < 2 * _t - 1)
                 {
                     // LR-Redistribute(M);
@@ -309,7 +316,7 @@ namespace BTree
                     Pair newParent = ParentOf(parent);
                     Adjust(parent, newParent.Node, newParent.Index);
                 }
-                //ENDIF;
+                //ENDIF;*/
             }
             // ELSIF M is underflowing THEN
             else if (node.Keys.Count <= _t - 1)
@@ -361,149 +368,7 @@ namespace BTree
                     // If no children left in parent node
                     if (parent.Children.Count == 0)
                     {
-                        Pair p =  ParentOf(parent);
-                        Node<T> parentOfParent = p.Node;
-                        Int32 newIndex = p.Index;
-                        Int32 indexNotEmpty = newIndex + 1;
-                        Int32 indexEmpty = newIndex;
-
-                        if (parentOfParent == null)
-                            return;
-                            
-                        if (newIndex + 1 >= parentOfParent.Children.Count)
-                        {
-                            indexNotEmpty = newIndex - 1;
-                        }
-
-                        bool isDone = true;
-                        do
-                        {
-                            Node<T> nonEmptyChild = parentOfParent.Children[indexNotEmpty];
-                            Node<T> emptyChild = parentOfParent.Children[indexEmpty];
-                            
-                            // If parent of parent has got only 1 key
-                            if (parentOfParent.Keys.Count == 1)
-                            {
-                                if (nonEmptyChild.Keys.Count != 1)
-                                {
-                                    if (newIndex + 1 < parentOfParent.Children.Count)
-                                    {
-                                        T newKey = parentOfParent.Keys[indexEmpty];
-                                        parentOfParent.Keys.RemoveAt(indexEmpty);
-                                        parentOfParent.Keys.Add(nonEmptyChild.Keys[0]);
-                                        nonEmptyChild.Keys.RemoveAt(0);
-
-                                        Node<T> newChildren1 = emptyChild;
-                                        Node<T> newChildren2 = nonEmptyChild.Children[0];
-                                        parentOfParent.Children.RemoveAt(indexEmpty);
-                                        nonEmptyChild.Children.RemoveAt(0); // TODO: ??? nonEmpty or Empty
-                                        Node<T> newNode = new Node<T>();
-
-                                        newNode.Keys.Add(newKey);
-                                        newNode.Children.Add(newChildren1);
-                                        newNode.Children.Add(newChildren2);
-
-                                        parentOfParent.Children.Insert(indexEmpty, newNode);
-                                    }
-                                    else
-                                    {
-                                        Node<T> newNode = new Node<T>();
-
-                                        newNode.Keys.Add(parentOfParent.Keys[indexNotEmpty]);
-                                        newNode.Children.Add(nonEmptyChild.Children.Last());
-                                        newNode.Children.Add(emptyChild);
-                                        parentOfParent.Keys.RemoveAt(indexNotEmpty);
-                                        parentOfParent.Keys.Insert(indexNotEmpty, nonEmptyChild.Keys.Last());
-
-                                        nonEmptyChild.Keys.RemoveAt(nonEmptyChild.Keys.Count - 1);
-                                        nonEmptyChild.Children.RemoveAt(nonEmptyChild.Children.Count - 1);
-
-                                        parentOfParent.Children.RemoveAt(indexEmpty);
-                                        parentOfParent.Children.Add(newNode);
-                                    }
-                                }
-                                else
-                                {                            
-                                    parentOfParent.Children.RemoveAt(indexNotEmpty);
-
-                                    T newKey = nonEmptyChild.Keys[0];
-
-                                    parentOfParent.Keys.Insert(indexNotEmpty, newKey);
-                                    parentOfParent.Children.InsertRange(indexNotEmpty, nonEmptyChild.Children);
-
-                                    isDone = false;
-                                }
-                            }
-                            else
-                            {
-                                if (newIndex + 1 < parentOfParent.Children.Count)
-                                {
-                                    if (nonEmptyChild.Keys.Count < MaxElements)
-                                    {
-                                        parentOfParent.Children.RemoveAt(indexEmpty);
-
-                                        nonEmptyChild.Keys.Insert(0, parentOfParent.Keys[indexEmpty]);
-                                        parentOfParent.Keys.RemoveAt(indexEmpty);
-                                        nonEmptyChild.Children.Insert(0, emptyChild);
-                                    }
-                                    else
-                                    {
-                                        Node<T> newNode = new Node<T>();
-
-                                        newNode.Keys.Add(parentOfParent.Keys[indexEmpty]);
-                                        newNode.Children.Add(emptyChild);
-                                        newNode.Children.Add(nonEmptyChild.Children[0]);
-
-                                        parentOfParent.Keys.RemoveAt(indexEmpty);
-                                        parentOfParent.Children.RemoveAt(indexEmpty);
-                                        parentOfParent.Children.Insert(indexEmpty, newNode);
-                                        parentOfParent.Keys.Insert(indexEmpty, nonEmptyChild.Keys[0]);
-
-                                        nonEmptyChild.Keys.RemoveAt(0);
-                                        nonEmptyChild.Children.RemoveAt(0);
-                                    }
-                                }
-                                else
-                                {
-                                    if (nonEmptyChild.Keys.Count < MaxElements)
-                                    {
-                                        Node<T> newChildren = emptyChild;
-                                        parentOfParent.Children.RemoveAt(indexEmpty);
-
-                                        nonEmptyChild.Keys.Add(parentOfParent.Keys[indexNotEmpty]);
-                                        parentOfParent.Keys.RemoveAt(indexNotEmpty);
-                                        nonEmptyChild.Children.Add(newChildren);
-                                    }
-                                    else
-                                    {
-                                        Node<T> newNode = new Node<T>();
-
-                                        newNode.Keys.Add(parentOfParent.Keys[indexNotEmpty]);
-                                        newNode.Children.Add(nonEmptyChild.Children.Last());
-                                        newNode.Children.Add(emptyChild);
-
-                                        parentOfParent.Keys.RemoveAt(indexNotEmpty);
-                                        parentOfParent.Children.RemoveAt(indexEmpty);
-                                        parentOfParent.Children.Insert(indexEmpty, newNode);
-                                        parentOfParent.Keys.Insert(indexNotEmpty, nonEmptyChild.Keys.Last());
-
-                                        nonEmptyChild.Keys.RemoveAt(nonEmptyChild.Keys.Count - 1);
-                                        nonEmptyChild.Children.RemoveAt(nonEmptyChild.Children.Count - 1);
-                                    }
-                                }
-                            }
-
-                            p =  ParentOf(parentOfParent);
-                            parentOfParent = p.Node;
-                            newIndex = p.Index;
-                            indexNotEmpty = newIndex + 1;
-                            indexEmpty = newIndex;
-
-                            if (parentOfParent != null && newIndex + 1 >= parentOfParent.Children.Count)
-                            {
-                                indexNotEmpty = newIndex - 1;
-                            }
-                        } while (!isDone && parentOfParent != null);
+                        LeafDepthFix(parent);
                     }
                 }
                 // ENDIF;
@@ -515,8 +380,157 @@ namespace BTree
                 // do nothing;
             }
             // ENDIF;
-
         } // End of 'Adjust' method
+
+        private void LeafDepthFix(Node<T> leaf)
+        {
+            Pair p =  ParentOf(leaf);
+            Node<T> parent = p.Node;
+            Int32 newIndex = p.Index;
+            Int32 indexNotEmpty = newIndex + 1;
+            Int32 indexEmpty = newIndex;
+
+            if (parent == null)
+                return;
+                
+            if (newIndex + 1 >= parent.Children.Count)
+            {
+                indexNotEmpty = newIndex - 1;
+            }
+
+            bool isDone = true;
+            do
+            {
+                Node<T> nonEmptyChild = parent.Children[indexNotEmpty];
+                Node<T> emptyChild = parent.Children[indexEmpty];
+                
+                // If parent of parent has got only 1 key
+                if (parent.Keys.Count <= _t - 1)
+                {
+                    // If sibling is not on verge of underflowing
+                    if (nonEmptyChild.Keys.Count > _t - 1)
+                    {
+                        // If right sibling exists
+                        if (newIndex + 1 < parent.Children.Count)
+                        {
+                            T newKey = parent.Keys[indexEmpty];
+                            parent.Keys.RemoveAt(indexEmpty);
+                            parent.Keys.Add(nonEmptyChild.Keys[0]);
+                            nonEmptyChild.Keys.RemoveAt(0);
+
+                            Node<T> newChildren1 = emptyChild;
+                            Node<T> newChildren2 = nonEmptyChild.Children[0];
+                            parent.Children.RemoveAt(indexEmpty);
+                            nonEmptyChild.Children.RemoveAt(0);
+                            Node<T> newNode = new Node<T>();
+
+                            newNode.Keys.Add(newKey);
+                            newNode.Children.Add(newChildren1);
+                            newNode.Children.Add(newChildren2);
+
+                            parent.Children.Insert(indexEmpty, newNode);
+                        }
+                        else // Exists left brother
+                        {
+                            Node<T> newNode = new Node<T>();
+
+                            newNode.Keys.Add(parent.Keys[indexNotEmpty]);
+                            newNode.Children.Add(nonEmptyChild.Children.Last());
+                            newNode.Children.Add(emptyChild);
+                            parent.Keys.RemoveAt(indexNotEmpty);
+                            parent.Keys.Insert(indexNotEmpty, nonEmptyChild.Keys.Last());
+
+                            nonEmptyChild.Keys.RemoveAt(nonEmptyChild.Keys.Count - 1);
+                            nonEmptyChild.Children.RemoveAt(nonEmptyChild.Children.Count - 1);
+
+                            parent.Children.RemoveAt(indexEmpty);
+                            parent.Children.Add(newNode);
+                        }
+                    }
+                    else
+                    {                            
+                        parent.Children.RemoveAt(indexNotEmpty);
+
+                        // T newKey = nonEmptyChild.Keys[0];
+
+                        // parent.Keys.Insert(indexNotEmpty, newKey);
+                        parent.Keys.InsertRange(indexNotEmpty, nonEmptyChild.Keys);
+                        parent.Children.InsertRange(indexNotEmpty, nonEmptyChild.Children);
+
+                        isDone = false;
+                    }
+                }
+                else
+                {
+                    if (newIndex + 1 < parent.Children.Count)
+                    {
+                        if (nonEmptyChild.Keys.Count < MaxElements)
+                        {
+                            parent.Children.RemoveAt(indexEmpty);
+
+                            nonEmptyChild.Keys.Insert(0, parent.Keys[indexEmpty]);
+                            parent.Keys.RemoveAt(indexEmpty);
+                            nonEmptyChild.Children.Insert(0, emptyChild);
+                        }
+                        else
+                        {
+                            Node<T> newNode = new Node<T>();
+
+                            newNode.Keys.Add(parent.Keys[indexEmpty]);
+                            newNode.Children.Add(emptyChild);
+                            newNode.Children.Add(nonEmptyChild.Children[0]);
+
+                            parent.Keys.RemoveAt(indexEmpty);
+                            parent.Children.RemoveAt(indexEmpty);
+                            parent.Children.Insert(indexEmpty, newNode);
+                            parent.Keys.Insert(indexEmpty, nonEmptyChild.Keys[0]);
+
+                            nonEmptyChild.Keys.RemoveAt(0);
+                            nonEmptyChild.Children.RemoveAt(0);
+                        }
+                    }
+                    else
+                    {
+                        if (nonEmptyChild.Keys.Count < MaxElements)
+                        {
+                            Node<T> newChildren = emptyChild;
+                            parent.Children.RemoveAt(indexEmpty);
+
+                            nonEmptyChild.Keys.Add(parent.Keys[indexNotEmpty]);
+                            parent.Keys.RemoveAt(indexNotEmpty);
+                            nonEmptyChild.Children.Add(newChildren);
+                        }
+                        else
+                        {
+                            Node<T> newNode = new Node<T>();
+
+                            newNode.Keys.Add(parent.Keys[indexNotEmpty]);
+                            newNode.Children.Add(nonEmptyChild.Children.Last());
+                            newNode.Children.Add(emptyChild);
+
+                            parent.Keys.RemoveAt(indexNotEmpty);
+                            parent.Children.RemoveAt(indexEmpty);
+                            parent.Children.Insert(indexEmpty, newNode);
+                            parent.Keys.Insert(indexNotEmpty, nonEmptyChild.Keys.Last());
+
+                            nonEmptyChild.Keys.RemoveAt(nonEmptyChild.Keys.Count - 1);
+                            nonEmptyChild.Children.RemoveAt(nonEmptyChild.Children.Count - 1);
+                        }
+                    }
+                }
+
+                p =  ParentOf(parent);
+                parent = p.Node;
+                newIndex = p.Index;
+                indexNotEmpty = newIndex + 1;
+                indexEmpty = newIndex;
+
+                if (parent != null && newIndex + 1 >= parent.Children.Count)
+                {
+                    indexNotEmpty = newIndex - 1;
+                }
+            } while (!isDone && parent != null);   
+        }
 
         private void RedistributeLR(Node<T> node, Node<T> parent, Int32 index)
         {
