@@ -210,7 +210,7 @@ namespace BTree
             Int32 prevIndex = -1;
 
             Node<T> curNode = _root;
-            Node<T> prevNode = null;
+            // Node<T> prevNode = null;
 
             if (_root.Keys.Contains(item))
             {
@@ -225,7 +225,6 @@ namespace BTree
             {
                 do
                 {
-                    prevNode = curNode;
                     curNode = curNode.Children[index];
                     prevIndex = index;
                     index = curNode.Keys.TakeWhile(key => item.CompareTo(key) > 0).Count();
@@ -236,7 +235,6 @@ namespace BTree
             if (!curNode.Keys.Contains(item))
                 // do nothing(or report error, if appropriate) ;
                 throw new Exception();
-
             // ELSE
             else
             {
@@ -377,6 +375,7 @@ namespace BTree
                     {
                         // child of M becomes root;
                         _root = node.Children[0];
+                        _root.Parent = null;
 
                         _height--;
                         // dispose of M;
