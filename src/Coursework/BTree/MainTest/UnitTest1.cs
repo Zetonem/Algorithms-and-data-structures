@@ -1,11 +1,12 @@
 /* FILE NAME   : UnitTest1.cs
  * PROGRAMMER  : Leonid Zaytsev.
- * LAST UPDATE : 03.05.2020.
+ * LAST UPDATE : 04.05.2020.
  * NOTE        : None.
  *
  * Copyright © 2020 Leonid Zaytsev. All rights reserved.
  */
 using System;
+using System.Collections.Generic;
 using NUnit.Framework;
 using BTree;
 
@@ -17,6 +18,7 @@ namespace MainTest
         [TestCase()]
         [TestCase(100, 200, 300, 400, 75, 500, 60, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 25, 50)]
         [TestCase(100, 1000, 1100, 300, 400, 75, 500, 60, 1300, 1400, 1500, 1600, 700, 800, 900, 1200, 1700, 200, 25, 50)]
+        [TestCase(100, 200, 300, 400, 75, 500, 60, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 25, 50, 812, 911, 733, 24, 174, 225, 730, 239, 228, 984, 1653, 7)]
         public void TestClear(params Int32[] array)
         {
             BTree<Int32> t = new BTree<Int32>(4);
@@ -40,7 +42,7 @@ namespace MainTest
         [TestCase(100, 1000, 1100, 300, 400, 75, 500, 60, 1300, 1400, 1500, 1600, 700, 800, 900, 1200, 1700, 200, 25, 50)]
         public void TestDelete1(params Int32[] array)
         {
-            BTree<Int32> t = new BTree<Int32>(3);
+            BTree<Int32> t = new BTree<Int32>(4);
 
             foreach (var el in array)
             {
@@ -50,11 +52,12 @@ namespace MainTest
             t.ToString();
 
             CheckConsistency(t.Root, 1, t.Height);
+            List<Int32> l = new List<Int32>(array.Length);
 
             while (t.Root.Keys.Count > 0)
             {
+                l.Add(t.Root.Keys[0]);
                 t.Remove(t.Root.Keys[0]);
-                t.ToString();
                 CheckConsistency(t.Root, 1, t.Height);
             }
 

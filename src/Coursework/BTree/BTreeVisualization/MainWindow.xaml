@@ -64,8 +64,8 @@
           <RowDefinition/>
         </Grid.RowDefinitions>
 
-        <Button x:Name="treeSave" Grid.Row="0" Content="Save tree" Margin="10" Width="100" MaxHeight="30"/>
-        <Button x:Name="treeLoad" Grid.Row="1" Content="Load tree" Margin="10" Width="100" MaxHeight="30"/>
+        <Button x:Name="treeSave" Grid.Row="0" Content="Save tree" Margin="10" Width="100" MaxHeight="30" Click="Save_OnClick"/>
+        <Button x:Name="treeLoad" Grid.Row="1" Content="Load tree" Margin="10" Width="100" MaxHeight="30" Click="Load_OnClick"/>
         <Button x:Name="treeInfo" Grid.Row="2" Content="Tree info" Margin="10" Width="100" MaxHeight="30"/>
       </Grid>
     </Grid>

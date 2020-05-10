@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Ribbon.Primitives;
 using System.Windows.Media;
 using BTree;
 
@@ -26,6 +23,32 @@ namespace BTreeVisualization
             tree.Add(200);
             tree.Add(300);
             tree.Add(400);
+            tree.Add(50);
+            tree.Add(500);
+            tree.Add(600);
+            tree.Add(25);
+            tree.Add(10);
+            tree.Add(5);
+            tree.Add(700);
+            tree.Add(800);
+            tree.Add(900);
+            tree.Add(1000);
+            tree.Add(1100);
+            tree.Add(1200);
+            tree.Add(1300);
+            tree.Add(1400);
+            tree.Add(1500);
+            tree.Add(1600);
+            tree.Add(1700);
+            tree.Add(1900);
+            tree.Add(2000);
+            tree.Add(2100);
+            tree.Add(2200);
+            tree.Add(2300);
+            tree.Add(2400);
+            tree.Add(2500);
+            tree.Add(2600);
+            tree.Add(2700);
             // tree.Add(75);
             // tree.Add(500);
             // tree.Add(600);
@@ -43,24 +66,23 @@ namespace BTreeVisualization
             // tree.Add(25);
             // tree.Add(50);
             
-            // tree.Remove(300);
-            // tree.Remove(400);
-            // tree.Remove(75);
-            // tree.Remove(1200);
-            // tree.Remove(1300);
-            // tree.Remove(1400);
-            // tree.Remove(500);
-            // tree.Remove(600);
-            // tree.Remove(900);
-            // tree.Remove(1000);
-            // tree.Remove(1100);
-            // tree.Remove(1500);
-            // tree.Remove(1600);
-            // tree.Remove(700);
-            // tree.Remove(800);
-            // tree.Remove(1700);
-            // tree.Remove(25);
-            // tree.Remove(50);
+            tree.Remove(300);
+            tree.Remove(400);
+            tree.Remove(1200);
+            tree.Remove(1300);
+            tree.Remove(1400);
+            tree.Remove(500);
+            tree.Remove(600);
+            tree.Remove(900);
+            tree.Remove(1000);
+            tree.Remove(1100);
+            tree.Remove(1500);
+            tree.Remove(1600);
+            tree.Remove(700);
+            tree.Remove(800);
+            tree.Remove(1700);
+            tree.Remove(25);
+            tree.Remove(50);
         }
 
         private struct NodeLev
@@ -198,6 +220,21 @@ namespace BTreeVisualization
 
             tree.Remove(num);
 
+            List<NodeLev> nodes = new List<NodeLev>();
+
+            TraversTree(tree.Root, 1, nodes);
+
+            Output(nodes);
+        }
+
+        private void Save_OnClick(object sender, RoutedEventArgs e)
+        {
+            tree.Upload("tree.dat");
+        }
+
+        private void Load_OnClick(object sender, RoutedEventArgs e)
+        {
+            tree = BTree<Int32>.Download("tree.dat");
             List<NodeLev> nodes = new List<NodeLev>();
 
             TraversTree(tree.Root, 1, nodes);
